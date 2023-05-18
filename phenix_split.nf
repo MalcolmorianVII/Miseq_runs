@@ -6,7 +6,8 @@ params {
 }
 
 process prepareReference {
-    conda = "/home/bkutambe/miniconda3/envs/phenix"
+    label "mbull"
+
     tag { dataset_id }
     publishDir "${params.root_dir}/${dataset_id}", mode: "copy"
 
@@ -16,6 +17,7 @@ process prepareReference {
     output:
     file "${params.output_dir_name}/${dataset_id}.*"
 
+    script:
     """
     phenix.py prepare_reference -r $ref \
     --mapper bwa \
@@ -24,7 +26,8 @@ process prepareReference {
 }
 
 process runSNPPipeline {
-    conda = "/home/bkutambe/miniconda3/envs/phenix"
+    label "mbull"
+
     tag { dataset_id }
     publishDir "${params.root_dir}/${dataset_id}", mode: "copy"
 
@@ -36,6 +39,7 @@ process runSNPPipeline {
     output:
     file "${params.output_dir_name}/${dataset_id}.*"
 
+    script:
     """
     phenix.py run_snp_pipeline \
     -r1 $forward \
@@ -49,7 +53,8 @@ process runSNPPipeline {
 }
 
 process convertVCFtoFASTA {
-    conda = "/home/bkutambe/miniconda3/envs/phenix"
+    label "mbull"
+
     tag { dataset_id }
     publishDir "${params.root_dir}/${dataset_id}", mode: "copy"
 
@@ -59,6 +64,7 @@ process convertVCFtoFASTA {
     output:
     file "${params.output_dir_name}/${dataset_id}.*"
 
+    script:
     """
     phenix.py vcf2fasta \
     -i ${vcf} \
@@ -68,15 +74,16 @@ process convertVCFtoFASTA {
 }
 
 process cleanUpFiles {
-    conda = "/home/bkutambe/miniconda3/envs/phenix"
+
     tag { dataset_id }
     publishDir "${params.root_dir}/${dataset_id}", mode: "copy"
 
     input:
     tuple val(dataset_id), file(fasta), file(vcf)
 
+    script:
     """
-    /home/bkutambe/miniconda3/bin/seqkit grep -n -i -v -p "reference" ${fasta} > ${params.output_dir_name}/${dataset_id}.fasta
+    seqkit grep -n -i -v -p "reference" ${fasta} > ${params.output_dir_name}/${dataset_id}.fasta
     rm ${fasta}
     gzip ${vcf}
     """
