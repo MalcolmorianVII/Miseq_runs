@@ -1,6 +1,6 @@
 params {
     alignment_file = "/path/to/alignment.bam"
-    reference_file = "/path/to/reference.fasta"
+    reference_file = "/home/bkutambe/salmonella/references/2022.11.29/AE006468.2.fasta"
     variant_file = "/path/to/variants.vcf"
 }
 
