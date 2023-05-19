@@ -1,25 +1,18 @@
-params {
-    root_dir = "/home/bkutambe/data/miseq_runs/Fastq"
-    ref = "/home/bkutambe/salmonella/references/2022.11.29/AE006468.2.fasta"
-    phenix_config = "/home/bkutambe/salmonella/references/2022.11.29/phenix_config.yml"
-    output_dir_name = "phenix_bbduk"
-}
 
 process prepareReference {
     label "mbull"
 
-    tag { dataset_id }
-    publishDir "${params.root_dir}/${dataset_id}", mode: "copy"
+    publishDir "${params.ref_dir}", mode: "copy"
 
     input:
-    tuple val(dataset_id), file(ref)
+    file(ref_dir)
 
     output:
-    file "${params.output_dir_name}/${dataset_id}.*"
+    file "${FASTA}.*"
 
     script:
     """
-    phenix.py prepare_reference -r $ref \
+    phenix.py prepare_reference -r ${ref_dir}/${FASTA} \
     --mapper bwa \
     --variant gatk
     """
@@ -97,7 +90,7 @@ workflow {
 
     prepareReference(read_pairs_phenix, params.ref)
     runSNPPipeline(read_pairs_phenix, phenix_config, params.ref)
-    convertVCFtoFASTA(runSNPPipeline.out, phenix_config, params.ref)
+    convertVCFtoFASTA(runSNPPipeline.out, params.ref)
     cleanUpFiles(convertVCFtoFASTA.out)
 }
 
